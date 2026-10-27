@@ -13,8 +13,9 @@ export const ForgotPassword = () => {
         e.preventDefault();
         try {
             await forgotPassword(email);
-        } catch (error) {
-            console.log(error)
+            setIsSubmitted(true);
+        } catch {
+            // forgotPassword() already shows the error toast
         }
     };
     return (

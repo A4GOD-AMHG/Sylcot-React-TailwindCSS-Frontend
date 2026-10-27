@@ -30,7 +30,7 @@ export const Register = () => {
                 setError('Email and password are required');
                 return;
             }
-            if (password.length < 8) {
+            if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
                 setError('Password must be at least 8 characters long, a capital letter, a number, and a special character');
                 return;
             }
@@ -38,10 +38,12 @@ export const Register = () => {
                 setError('Passwords do not match');
                 return;
             }
+            setError('');
             await register({ name, email, password });
-            navigate('/dashboard');
-        } catch (err) {
-            console.log(err)
+            // The account must be verified by email before logging in.
+            navigate('/auth/login');
+        } catch {
+            // register() already shows the error toast
         }
     };
 
@@ -70,7 +72,7 @@ export const Register = () => {
                 <div>
                     <label className="block text-gray-700 dark:text-white mb-2">Name</label>
                     <input
-                        type="name"
+                        type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="custom-input"

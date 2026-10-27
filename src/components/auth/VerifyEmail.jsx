@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
@@ -9,8 +9,13 @@ export const VerifyEmail = () => {
     const [error, setError] = useState('');
 
     const token = searchParams.get('token');
+    // The token is single-use: StrictMode's double effect run would make the second call fail.
+    const requested = useRef(false);
 
     useEffect(() => {
+        if (requested.current) return;
+        requested.current = true;
+
         if (!token) {
             setError('Invalid verification link');
             setIsVerifying(false);
@@ -19,7 +24,6 @@ export const VerifyEmail = () => {
 
         const verify = async () => {
             try {
-                await new Promise(resolve => setTimeout(resolve, 1000));
                 await verifyEmail(token);
             } catch (err) {
                 setError(err.message || 'Failed to verify email');
