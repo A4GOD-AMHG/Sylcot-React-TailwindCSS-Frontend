@@ -1,13 +1,22 @@
 import { useState } from 'react';
 import {
     FaCheckCircle,
+    FaPen,
     FaRegCircle,
     FaTrash
 } from 'react-icons/fa';
 import { getCategoryIcon, getPriorityIcon } from '@/utils/utils';
 
-const TaskCard = ({ task, onToggleTask, onDeleteTask }) => {
+const TaskCard = ({ task, onToggleTask, onUpdateTask, onDeleteTask }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [toggling, setToggling] = useState(false);
+    const color = task.category?.color || '#B0BEC5';
+
+    const handleToggle = async () => {
+        setToggling(true);
+        await onToggleTask(task.id);
+        setToggling(false);
+    };
 
     const handleDelete = () => {
         setShowDeleteModal(false);
@@ -16,59 +25,70 @@ const TaskCard = ({ task, onToggleTask, onDeleteTask }) => {
 
     return (
         <>
-            <div
-                className={`relative p-4 rounded-lg shadow-md transition-all duration-300 
-            bg-gray-100 dark:bg-gray-700 border-[5px] ${task.status ? 'opacity-50' : 'opacity-100'}`}
-                style={{ borderColor: task.category.color }}
+            <article
+                className={`group relative flex min-h-36 flex-col justify-between rounded-2xl border-l-[6px] bg-gray-100 p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-gray-700 ${task.status ? 'opacity-60' : ''}`}
+                style={{ borderLeftColor: color }}
             >
-                <div className="absolute top-2 right-2 flex items-center">
-                    <div className="p-1.5">
-                        {getCategoryIcon(task.category.icon_name, task.category.color)}
-                    </div>
-                    <div className="p-1.5">
+                <div className="flex items-start justify-between gap-3">
+                    <h3 className={`text-lg font-semibold break-words text-gray-800 transition-all duration-500 dark:text-white ${task.status ? 'line-through decoration-2' : ''}`}>
+                        {task.title}
+                    </h3>
+                    <div className="flex shrink-0 items-center gap-1" title={`Priority: ${task.priority}`}>
                         {getPriorityIcon(task.priority)}
                     </div>
                 </div>
 
-                <div className="mb-8">
-                    <h3 className={`text-lg font-semibold text-gray-800 dark:text-white transition-all duration-1000
-                        ${task.status ? 'line-through opacity-75' : 'no-underline'}`}>
-                        {task.title}
-                    </h3>
-                </div>
-
-                <div className="absolute bottom-2 right-2 flex">
-                    <button
-                        onClick={() => onToggleTask(task.id)}
-                        className={`p-1 cursor-pointer rounded-full hover:opacity-80 transition-opacity ${task.status ? 'text-green-500' : 'text-gray-500 dark:text-gray-300'
-                            }`}
+                <div className="mt-4 flex items-center justify-between">
+                    <span
+                        className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-gray-700 dark:text-gray-100"
+                        style={{ backgroundColor: `${color}33` }}
                     >
-                        {task.status ? (<FaCheckCircle className="text-2xl" />) : (<FaRegCircle className="text-2xl" />)}
-                    </button>
+                        {getCategoryIcon(task.category?.icon_name, color)}
+                        {task.category?.title}
+                    </span>
 
-                    <button
-                        onClick={() => setShowDeleteModal(true)}
-                        className="p-1 cursor-pointer text-red-500 hover:opacity-80 transition-opacity"
-                    >
-                        <FaTrash className="text-xl" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => onUpdateTask(task)}
+                            aria-label="Edit task"
+                            className="cursor-pointer rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-200 hover:text-blue-600 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                            <FaPen className="text-sm" />
+                        </button>
+                        <button
+                            onClick={() => setShowDeleteModal(true)}
+                            aria-label="Delete task"
+                            className="cursor-pointer rounded-full p-2 text-gray-500 transition-colors hover:bg-gray-200 hover:text-red-500 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                            <FaTrash className="text-sm" />
+                        </button>
+                        <button
+                            onClick={handleToggle}
+                            disabled={toggling}
+                            aria-label={task.status ? 'Mark as pending' : 'Mark as completed'}
+                            className={`cursor-pointer rounded-full p-1 transition-transform hover:scale-110 disabled:opacity-50 ${task.status ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-300'}`}
+                        >
+                            {task.status ? <FaCheckCircle className="text-2xl" /> : <FaRegCircle className="text-2xl" />}
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </article>
 
             {showDeleteModal && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-xs w-full">
-                        <h4 className="text-lg mb-4 font-medium dark:text-white">Do you want to delete this task?</h4>
-                        <div className="flex justify-end space-x-3">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}>
+                    <div className="animate-pop w-full max-w-xs rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800" onClick={(e) => e.stopPropagation()}>
+                        <h4 className="mb-2 text-lg font-semibold dark:text-white">Delete this task?</h4>
+                        <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">"{task.title}" will be removed permanently.</p>
+                        <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setShowDeleteModal(false)}
-                                className="px-4 py-2 cursor-pointer text-white bg-gray-600 rounded hover:bg-gray-700 transition-colors"
+                                className="cursor-pointer rounded-lg bg-gray-200 px-4 py-2 text-gray-800 transition-colors hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleDelete}
-                                className="px-4 py-2 cursor-pointer bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                className="cursor-pointer rounded-lg bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600"
                             >
                                 Delete
                             </button>
