@@ -1,50 +1,11 @@
 import api from '@/services/api';
 
 const TaskService = {
-    getTasks: async () => {
-        try {
-            const response = await api.get('/tasks');
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.error);
-        }
-    },
-
-    createTask: async (task) => {
-        try {
-            const response = await api.post('/tasks', task);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.error);
-        }
-    },
-
-    updateTask: async (id, task) => {
-        try {
-            const response = await api.put(`/tasks/${id}`, task);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.error);
-        }
-    },
-
-    deleteTask: async (id) => {
-        try {
-            const response = await api.delete(`/tasks/${id}`);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.error);
-        }
-    },
-
-    toggleTask: async (id) => {
-        try {
-            const response = await api.patch(`/tasks/${id}/complete`);
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.error);
-        }
-    },
+    getTasks: async () => (await api.get('/tasks')).data,
+    createTask: async (task) => (await api.post('/tasks', task)).data,
+    updateTask: async (id, task) => (await api.put(`/tasks/${id}`, task)).data,
+    deleteTask: async (id) => (await api.delete(`/tasks/${id}`)).data,
+    toggleTask: async (id) => (await api.patch(`/tasks/${id}/complete`)).data,
 };
 
 export default TaskService;

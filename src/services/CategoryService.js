@@ -1,14 +1,7 @@
 import api from '@/services/api';
 
 const CategoryService = {
-    getCategories: async () => {
-        try {
-            const response = await api.get('/categories');
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.error);
-        }
-    }
-}
+    getCategories: async () => (await api.get('/categories')).data,
+};
 
-export default CategoryService
+export default CategoryService;
